@@ -1,3 +1,212 @@
+// ---- i18n ----
+const i18n = {
+    en: {
+        // Header
+        title: 'SS Server Monitor',
+        connecting: 'Connecting...',
+        connected: 'Connected',
+        disconnected: 'Disconnected',
+        addServer: '+ Add Server',
+        login: 'Login',
+        logout: 'Logout',
+        settings: 'Settings',
+        // Empty state
+        emptyState: 'No servers configured. Add a server to start monitoring.',
+        // Card
+        tcpLatency: 'TCP Latency',
+        uptime: 'Uptime',
+        avg: 'Avg',
+        lastCheck: 'Last check',
+        checks: 'checks',
+        never: 'Never',
+        check: 'Check',
+        edit: 'Edit',
+        del: 'Del',
+        protocol: 'Protocol',
+        // Time
+        justNow: 'just now',
+        secsAgo: 's ago',
+        minsAgo: 'm ago',
+        hrsAgo: 'h ago',
+        daysAgo: 'd ago',
+        // Login modal
+        loginTitle: 'Login',
+        username: 'Username',
+        password: 'Password',
+        loginBtn: 'Login',
+        loginInvalid: 'Invalid username or password',
+        loginFailed: 'Login failed',
+        // Server modal
+        addServerTitle: 'Add Server',
+        editServerTitle: 'Edit Server',
+        name: 'Name',
+        host: 'Host',
+        port: 'Port',
+        ssPassword: 'Password',
+        encMethod: 'Encryption Method',
+        tags: 'Tags (comma separated)',
+        enabled: 'Enabled',
+        cancel: 'Cancel',
+        save: 'Save',
+        // Settings modal
+        settingsTitle: 'Settings',
+        checkInterval: 'Check Interval (seconds)',
+        checkIntervalHint: 'Min 5s, how often to check all servers',
+        intervalError: 'Interval must be at least 5 seconds',
+        // Errors
+        error: 'Error: ',
+        deleteConfirm: 'Delete server',
+        invalidHost: 'Invalid host: please enter a valid IP address or domain name',
+        invalidPort: 'Invalid port: must be between 1 and 65535',
+        // Theme
+        switchLight: 'Switch to light mode',
+        switchDark: 'Switch to dark mode',
+        // Optgroups
+        aeadGroup: 'AEAD',
+        aead2022Group: 'AEAD 2022',
+        streamGroup: 'Stream (legacy)',
+        // Placeholders
+        phName: 'e.g. Tokyo-01',
+        phHost: 'e.g. 103.45.67.89',
+        phPassword: 'SS password',
+        phTags: 'e.g. jp, premium',
+    },
+    zh: {
+        title: 'SS 服务器监控',
+        connecting: '连接中...',
+        connected: '已连接',
+        disconnected: '已断开',
+        addServer: '+ 添加服务器',
+        login: '登录',
+        logout: '退出',
+        settings: '设置',
+        emptyState: '未配置服务器，请添加服务器以开始监控。',
+        tcpLatency: 'TCP 延迟',
+        uptime: '在线率',
+        avg: '均值',
+        lastCheck: '上次检查',
+        checks: '次检查',
+        never: '从未',
+        check: '检查',
+        edit: '编辑',
+        del: '删除',
+        protocol: '协议',
+        justNow: '刚刚',
+        secsAgo: '秒前',
+        minsAgo: '分钟前',
+        hrsAgo: '小时前',
+        daysAgo: '天前',
+        loginTitle: '登录',
+        username: '用户名',
+        password: '密码',
+        loginBtn: '登录',
+        loginInvalid: '用户名或密码错误',
+        loginFailed: '登录失败',
+        addServerTitle: '添加服务器',
+        editServerTitle: '编辑服务器',
+        name: '名称',
+        host: '主机',
+        port: '端口',
+        ssPassword: '密码',
+        encMethod: '加密方式',
+        tags: '标签（逗号分隔）',
+        enabled: '启用',
+        cancel: '取消',
+        save: '保存',
+        settingsTitle: '设置',
+        checkInterval: '检查间隔（秒）',
+        checkIntervalHint: '最少 5 秒，检查所有服务器的频率',
+        intervalError: '间隔至少为 5 秒',
+        error: '错误：',
+        deleteConfirm: '删除服务器',
+        invalidHost: '主机地址无效：请输入有效的 IP 地址或域名',
+        invalidPort: '端口无效：必须在 1 到 65535 之间',
+        switchLight: '切换到浅色模式',
+        switchDark: '切换到深色模式',
+        aeadGroup: 'AEAD',
+        aead2022Group: 'AEAD 2022',
+        streamGroup: 'Stream（旧版）',
+        phName: '例如 Tokyo-01',
+        phHost: '例如 103.45.67.89',
+        phPassword: 'SS 密码',
+        phTags: '例如 jp, premium',
+    }
+};
+
+const browserLang = (navigator.language || '').startsWith('zh') ? 'zh' : 'en';
+let currentLang = localStorage.getItem('lang') || browserLang;
+
+function t(key) {
+    return (i18n[currentLang] && i18n[currentLang][key]) || i18n.en[key] || key;
+}
+
+function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    applyI18nToHTML();
+    renderAll();
+    updateThemeIcon();
+    updateLangBtn();
+    // Update SSE status badge text
+    const cls = connStatus.className;
+    if (cls.includes('badge-green')) connStatus.textContent = t('connected');
+    else if (cls.includes('badge-red')) connStatus.textContent = t('disconnected');
+    else connStatus.textContent = t('connecting');
+}
+
+function applyI18nToHTML() {
+    document.title = t('title');
+    document.querySelector('header h1').textContent = t('title');
+    btnAddServer.textContent = t('addServer');
+    btnLogin.textContent = t('login');
+    btnLogout.textContent = t('logout');
+    document.querySelector('#empty-state p').textContent = t('emptyState');
+    // Connection status is updated separately
+
+    // Login modal
+    document.querySelector('#login-overlay .modal-header h2').textContent = t('loginTitle');
+    document.querySelector('label[for="login-username"]').textContent = t('username');
+    document.querySelector('label[for="login-password"]').textContent = t('password');
+    document.querySelector('#login-form button[type="submit"]').textContent = t('loginBtn');
+
+    // Server modal
+    document.querySelector('label[for="form-name"]').textContent = t('name');
+    document.querySelector('label[for="form-host"]').textContent = t('host');
+    document.querySelector('label[for="form-port"]').textContent = t('port');
+    document.querySelector('label[for="form-password"]').textContent = t('ssPassword');
+    document.querySelector('label[for="form-method"]').textContent = t('encMethod');
+    document.querySelector('label[for="form-tags"]').textContent = t('tags');
+    document.querySelector('#form-enabled').parentElement.childNodes[1].textContent = ' ' + t('enabled');
+    document.getElementById('form-name').placeholder = t('phName');
+    document.getElementById('form-host').placeholder = t('phHost');
+    document.getElementById('form-password').placeholder = t('phPassword');
+    document.getElementById('form-tags').placeholder = t('phTags');
+    document.getElementById('btn-cancel').textContent = t('cancel');
+    document.querySelector('#server-form button[type="submit"]').textContent = t('save');
+
+    // Optgroups
+    const optgroups = document.querySelectorAll('#form-method optgroup');
+    if (optgroups[0]) optgroups[0].label = t('aeadGroup');
+    if (optgroups[1]) optgroups[1].label = t('aead2022Group');
+    if (optgroups[2]) optgroups[2].label = t('streamGroup');
+
+    // Settings modal
+    document.querySelector('#settings-overlay .modal-header h2').textContent = t('settingsTitle');
+    document.querySelector('label[for="settings-interval"]').textContent = t('checkInterval');
+    document.querySelector('#settings-form .form-hint').textContent = t('checkIntervalHint');
+    document.getElementById('btn-settings-cancel').textContent = t('cancel');
+    document.querySelector('#settings-form button[type="submit"]').textContent = t('save');
+
+    // Settings button if exists
+    const btnSettings = document.getElementById('btn-settings');
+    if (btnSettings) btnSettings.textContent = t('settings');
+}
+
+function updateLangBtn() {
+    btnLang.textContent = currentLang === 'zh' ? 'EN' : '中';
+    btnLang.title = currentLang === 'zh' ? 'Switch to English' : '切换到中文';
+}
+
 // ---- Theme ----
 const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
 document.documentElement.setAttribute('data-theme', savedTheme);
@@ -26,6 +235,7 @@ const settingsOverlay = document.getElementById('settings-overlay');
 const settingsForm = document.getElementById('settings-form');
 const headerActions = document.querySelector('.header-actions');
 const btnTheme = document.getElementById('btn-theme');
+const btnLang = document.getElementById('btn-lang');
 
 // ---- Event Listeners ----
 btnAddServer.addEventListener('click', () => openModal());
@@ -43,7 +253,10 @@ document.getElementById('btn-settings-cancel').addEventListener('click', () => s
 settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.add('hidden'); });
 settingsForm.addEventListener('submit', handleSettingsSave);
 btnTheme.addEventListener('click', toggleTheme);
+btnLang.addEventListener('click', () => setLang(currentLang === 'zh' ? 'en' : 'zh'));
 updateThemeIcon();
+updateLangBtn();
+applyI18nToHTML();
 
 // ---- Init ----
 checkAuthStatus().then(() => {
@@ -89,7 +302,7 @@ function setAuthUI(authed) {
         const btn = document.createElement('button');
         btn.id = 'btn-settings';
         btn.className = 'btn';
-        btn.textContent = 'Settings';
+        btn.textContent = t('settings');
         btn.addEventListener('click', openSettings);
         headerActions.insertBefore(btn, btnAddServer);
     } else if (!authed && existing) {
@@ -113,7 +326,7 @@ async function handleLogin(e) {
             body: JSON.stringify({ username, password }),
         });
         if (!res.ok) {
-            loginError.textContent = 'Invalid username or password';
+            loginError.textContent = t('loginInvalid');
             loginError.classList.remove('hidden');
             return;
         }
@@ -125,7 +338,7 @@ async function handleLogin(e) {
         setAuthUI(true);
         fetchServers(); // Re-fetch with auth to get full data
     } catch {
-        loginError.textContent = 'Login failed';
+        loginError.textContent = t('loginFailed');
         loginError.classList.remove('hidden');
     }
 }
@@ -161,12 +374,12 @@ function connectSSE() {
     const evtSource = new EventSource('/api/events');
 
     evtSource.onopen = () => {
-        connStatus.textContent = 'Connected';
+        connStatus.textContent = t('connected');
         connStatus.className = 'badge badge-green';
     };
 
     evtSource.onerror = () => {
-        connStatus.textContent = 'Disconnected';
+        connStatus.textContent = t('disconnected');
         connStatus.className = 'badge badge-red';
     };
 
@@ -254,7 +467,7 @@ async function triggerCheck(id) {
     } catch (e) {
         console.error('Check failed:', e);
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Check'; }
+        if (btn) { btn.disabled = false; btn.textContent = t('check'); }
     }
 }
 
@@ -335,7 +548,7 @@ function renderCard(status) {
     // SS protocol check result display (only show method when authed)
     let ssHtml = '';
     if (ss) {
-        const methodLabel = isAuthed && server.method ? esc(server.method) : 'Protocol';
+        const methodLabel = isAuthed && server.method ? esc(server.method) : t('protocol');
         const ssBadge = ss.success
             ? `<span class="badge badge-green">OK${ss.latency_ms ? ` ${ss.latency_ms.toFixed(0)}ms` : ''}</span>`
             : `<span class="badge badge-red">FAIL</span>`;
@@ -354,9 +567,9 @@ function renderCard(status) {
     if (isAuthed) {
         actionsHtml = `
             <div class="card-actions">
-                <button class="btn btn-sm" data-check-id="${server.id}" onclick="triggerCheck('${server.id}')">Check</button>
-                <button class="btn btn-sm" onclick="openEditModal('${server.id}')">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="confirmDelete('${server.id}')">Del</button>
+                <button class="btn btn-sm" data-check-id="${server.id}" onclick="triggerCheck('${server.id}')">${t('check')}</button>
+                <button class="btn btn-sm" onclick="openEditModal('${server.id}')">${t('edit')}</button>
+                <button class="btn btn-sm btn-danger" onclick="confirmDelete('${server.id}')">${t('del')}</button>
             </div>
         `;
     }
@@ -374,7 +587,9 @@ function renderCard(status) {
 
     const lastCheck = status.latest_result
         ? timeAgo(new Date(status.latest_result.timestamp))
-        : 'Never';
+        : t('never');
+
+    const totalChecks = status.total_checks ?? status.history.length;
 
     card.innerHTML = `
         <div class="card-header">
@@ -389,22 +604,22 @@ function renderCard(status) {
         <div class="card-stats">
             <div class="stat">
                 <div class="stat-value ${latencyClass}">${latencyStr}<small>${tcp?.latency_ms != null ? 'ms' : ''}</small></div>
-                <div class="stat-label">TCP Latency</div>
+                <div class="stat-label">${t('tcpLatency')}</div>
             </div>
             <div class="stat">
                 <div class="stat-value ${uptimeClass}">${uptimeStr}</div>
-                <div class="stat-label">Uptime</div>
+                <div class="stat-label">${t('uptime')}</div>
             </div>
             <div class="stat">
                 <div class="stat-value ${avgClass}">${avgStr}<small>${status.avg_latency_ms != null ? 'ms' : ''}</small></div>
-                <div class="stat-label">Avg</div>
+                <div class="stat-label">${t('avg')}</div>
             </div>
         </div>
         ${ssHtml}
         ${chartEntries.length > 0 ? `<div class="latency-chart">${barsHtml}</div>` : ''}
         <div class="card-footer">
-            <span>Last check: ${lastCheck}</span>
-            <span>${status.total_checks ?? status.history.length} checks</span>
+            <span>${t('lastCheck')}: ${lastCheck}</span>
+            <span>${totalChecks} ${t('checks')}</span>
         </div>
     `;
 }
@@ -413,7 +628,7 @@ function renderCard(status) {
 
 function openModal() {
     if (!isAuthed) return;
-    modalTitle.textContent = 'Add Server';
+    modalTitle.textContent = t('addServerTitle');
     form.reset();
     document.getElementById('form-id').value = '';
     document.getElementById('form-port').value = '8388';
@@ -428,7 +643,7 @@ function openEditModal(id) {
     if (!status) return;
     const s = status.server;
 
-    modalTitle.textContent = 'Edit Server';
+    modalTitle.textContent = t('editServerTitle');
     document.getElementById('form-id').value = s.id;
     document.getElementById('form-name').value = s.name;
     document.getElementById('form-host').value = s.host;
@@ -450,10 +665,22 @@ async function handleFormSubmit(e) {
     const tagsRaw = document.getElementById('form-tags').value;
     const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(t => t) : [];
 
+    const host = document.getElementById('form-host').value.trim();
+    const port = parseInt(document.getElementById('form-port').value, 10);
+
+    if (!isValidHost(host)) {
+        alert(t('invalidHost'));
+        return;
+    }
+    if (isNaN(port) || port < 1 || port > 65535) {
+        alert(t('invalidPort'));
+        return;
+    }
+
     const data = {
         name: document.getElementById('form-name').value,
-        host: document.getElementById('form-host').value,
-        port: parseInt(document.getElementById('form-port').value, 10),
+        host,
+        port,
         password: document.getElementById('form-password').value,
         method: document.getElementById('form-method').value,
         enabled: document.getElementById('form-enabled').checked,
@@ -468,7 +695,7 @@ async function handleFormSubmit(e) {
         }
         closeModal();
     } catch (err) {
-        alert('Error: ' + err.message);
+        alert(t('error') + err.message);
     }
 }
 
@@ -476,11 +703,11 @@ async function confirmDelete(id) {
     if (!isAuthed) return;
     const status = servers.get(id);
     if (!status) return;
-    if (!confirm(`Delete server "${status.server.name}"?`)) return;
+    if (!confirm(`${t('deleteConfirm')} "${status.server.name}"?`)) return;
     try {
         await deleteServer(id);
     } catch (err) {
-        alert('Error: ' + err.message);
+        alert(t('error') + err.message);
     }
 }
 
@@ -497,7 +724,7 @@ function toggleTheme() {
 function updateThemeIcon() {
     const theme = document.documentElement.getAttribute('data-theme') || 'dark';
     btnTheme.textContent = theme === 'dark' ? '\u{2600}' : '\u{1F319}';
-    btnTheme.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    btnTheme.title = theme === 'dark' ? t('switchLight') : t('switchDark');
 }
 
 // ---- Settings ----
@@ -519,7 +746,7 @@ async function handleSettingsSave(e) {
     e.preventDefault();
     const interval = parseInt(document.getElementById('settings-interval').value, 10);
     if (isNaN(interval) || interval < 5) {
-        alert('Interval must be at least 5 seconds');
+        alert(t('intervalError'));
         return;
     }
     try {
@@ -529,14 +756,27 @@ async function handleSettingsSave(e) {
             body: JSON.stringify({ check_interval_secs: interval }),
         });
         if (res.status === 401) { setAuthUI(false); return; }
-        if (!res.ok) { alert('Error: ' + await res.text()); return; }
+        if (!res.ok) { alert(t('error') + await res.text()); return; }
         settingsOverlay.classList.add('hidden');
     } catch (err) {
-        alert('Error: ' + err.message);
+        alert(t('error') + err.message);
     }
 }
 
 // ---- Utils ----
+
+function isValidHost(host) {
+    if (!host) return false;
+    // IPv4
+    const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    const m = host.match(ipv4);
+    if (m) return m.slice(1).every(n => parseInt(n, 10) <= 255);
+    // IPv6 (simplified: brackets optional)
+    const bare = host.replace(/^\[|\]$/g, '');
+    if (/^[0-9a-fA-F:]+$/.test(bare) && bare.includes(':')) return true;
+    // Domain name
+    return /^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)*[a-zA-Z]{2,}$/.test(host);
+}
 
 function esc(str) {
     const div = document.createElement('div');
@@ -546,13 +786,13 @@ function esc(str) {
 
 function timeAgo(date) {
     const secs = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (secs < 5) return 'just now';
-    if (secs < 60) return `${secs}s ago`;
+    if (secs < 5) return t('justNow');
+    if (secs < 60) return `${secs}${t('secsAgo')}`;
     const mins = Math.floor(secs / 60);
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 60) return `${mins}${t('minsAgo')}`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
+    if (hrs < 24) return `${hrs}${t('hrsAgo')}`;
+    return `${Math.floor(hrs / 24)}${t('daysAgo')}`;
 }
 
 window.triggerCheck = triggerCheck;
