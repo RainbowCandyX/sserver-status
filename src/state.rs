@@ -88,6 +88,7 @@ pub async fn is_authenticated(state: &AppState, token: &str) -> bool {
 pub async fn get_server_statuses(state: &AppState) -> Vec<ServerStatus> {
     let servers = state.servers.read().await;
     let results = state.results.read().await;
+    let db = state.db.lock().await;
 
     servers
         .values()
@@ -116,12 +117,16 @@ pub async fn get_server_statuses(state: &AppState) -> Vec<ServerStatus> {
                 Some(latencies.iter().sum::<f64>() / latencies.len() as f64)
             };
 
+            let total_checks = crate::db::count_results_for_server(&db, server.id)
+                .unwrap_or(history.len() as u64);
+
             ServerStatus {
                 server: server.clone(),
                 latest_result,
                 history,
                 uptime_pct,
                 avg_latency_ms,
+                total_checks,
             }
         })
         .collect()

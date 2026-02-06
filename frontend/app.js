@@ -200,6 +200,7 @@ function handleCheckResult(result) {
     status.latest_result = result;
     status.history.unshift(result);
     if (status.history.length > 100) status.history.pop();
+    status.total_checks = (status.total_checks || 0) + 1;
 
     const tcpUp = status.history.filter(r => r.tcp_check.reachable).length;
     status.uptime_pct = status.history.length > 0 ? (tcpUp / status.history.length) * 100 : 0;
@@ -249,6 +250,7 @@ async function triggerCheck(id) {
     try {
         const res = await fetch(`/api/servers/${id}/check`, { method: 'POST' });
         if (!res.ok) throw new Error(await res.text());
+        await fetchServers();
     } catch (e) {
         console.error('Check failed:', e);
     } finally {
@@ -402,7 +404,7 @@ function renderCard(status) {
         ${chartEntries.length > 0 ? `<div class="latency-chart">${barsHtml}</div>` : ''}
         <div class="card-footer">
             <span>Last check: ${lastCheck}</span>
-            <span>${status.history.length} checks</span>
+            <span>${status.total_checks ?? status.history.length} checks</span>
         </div>
     `;
 }

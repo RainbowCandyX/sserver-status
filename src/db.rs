@@ -110,6 +110,15 @@ pub fn load_results_for_server(
     Ok(results)
 }
 
+pub fn count_results_for_server(conn: &Connection, server_id: Uuid) -> Result<u64> {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM check_results WHERE server_id = ?1",
+        params![server_id.to_string()],
+        |row| row.get(0),
+    )?;
+    Ok(count as u64)
+}
+
 pub fn cleanup_old(conn: &Connection, keep_days: i64) -> Result<usize> {
     let cutoff = Utc::now() - Duration::days(keep_days);
     let deleted = conn.execute(

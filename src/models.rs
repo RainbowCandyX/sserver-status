@@ -67,6 +67,7 @@ pub struct ServerStatus {
     pub history: Vec<CheckResult>,
     pub uptime_pct: f64,
     pub avg_latency_ms: Option<f64>,
+    pub total_checks: u64,
 }
 
 /// Public view of server status — uses PublicServer
@@ -77,6 +78,7 @@ pub struct PublicServerStatus {
     pub history: Vec<CheckResult>,
     pub uptime_pct: f64,
     pub avg_latency_ms: Option<f64>,
+    pub total_checks: u64,
 }
 
 impl From<&ServerStatus> for PublicServerStatus {
@@ -87,6 +89,7 @@ impl From<&ServerStatus> for PublicServerStatus {
             history: s.history.clone(),
             uptime_pct: s.uptime_pct,
             avg_latency_ms: s.avg_latency_ms,
+            total_checks: s.total_checks,
         }
     }
 }
