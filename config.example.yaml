@@ -1,0 +1,42 @@
+# sserver-status configuration
+
+# Web server listen address
+listen: "0.0.0.0:3000"
+
+# Admin login credentials
+auth:
+  username: "admin"
+  password: "change-me"
+
+# Check settings
+check_interval_secs: 60
+tcp_timeout_secs: 5
+ss_timeout_secs: 10
+# Target host for SS protocol check (sends HTTP GET /generate_204)
+test_target: "www.gstatic.com"
+
+# Servers to monitor
+servers:
+  - name: "Tokyo-01"
+    host: "103.45.67.89"
+    port: 8388
+    password: "your-password-here"
+    method: "aes-256-gcm"
+    enabled: true
+    tags: ["jp", "premium"]
+
+  - name: "US-West-01"
+    host: "us-west.example.com"
+    port: 443
+    password: "another-password"
+    method: "chacha20-ietf-poly1305"
+    enabled: true
+    tags: ["us"]
+
+  - name: "Singapore-02"
+    host: "sg2.example.com"
+    port: 8388
+    password: "sg-password"
+    method: "2022-blake3-aes-256-gcm"
+    enabled: false
+    tags: ["sg"]

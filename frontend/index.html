@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadowsocks Server Monitor</title>
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        document.documentElement.setAttribute('data-theme',
+            localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
+    </script>
+</head>
+<body>
+    <header>
+        <h1>SS Server Monitor</h1>
+        <div class="header-actions">
+            <button id="btn-theme" class="btn-icon" title="Toggle theme"></button>
+            <span id="connection-status" class="badge badge-gray">Connecting...</span>
+            <button id="btn-add-server" class="btn btn-primary hidden">+ Add Server</button>
+            <button id="btn-login" class="btn">Login</button>
+            <button id="btn-logout" class="btn hidden">Logout</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="server-grid" class="server-grid">
+            <div class="empty-state" id="empty-state">
+                <p>No servers configured. Add a server to start monitoring.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-overlay" class="modal-overlay hidden">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Login</h2>
+                <button class="btn-close" id="btn-login-close">&times;</button>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required autocomplete="current-password">
+                </div>
+                <div id="login-error" class="login-error hidden"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="width:100%">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Server Modal -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Server</h2>
+                <button class="btn-close" id="btn-modal-close">&times;</button>
+            </div>
+            <form id="server-form">
+                <input type="hidden" id="form-id" value="">
+                <div class="form-group">
+                    <label for="form-name">Name</label>
+                    <input type="text" id="form-name" required placeholder="e.g. Tokyo-01">
+                </div>
+                <div class="form-row">
+                    <div class="form-group flex-2">
+                        <label for="form-host">Host</label>
+                        <input type="text" id="form-host" required placeholder="e.g. 103.45.67.89">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="form-port">Port</label>
+                        <input type="number" id="form-port" required min="1" max="65535" value="8388">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="form-password">Password</label>
+                    <input type="password" id="form-password" required placeholder="SS password">
+                </div>
+                <div class="form-group">
+                    <label for="form-method">Encryption Method</label>
+                    <select id="form-method">
+                        <optgroup label="AEAD">
+                            <option value="aes-128-gcm">aes-128-gcm</option>
+                            <option value="aes-256-gcm" selected>aes-256-gcm</option>
+                            <option value="chacha20-ietf-poly1305">chacha20-ietf-poly1305</option>
+                        </optgroup>
+                        <optgroup label="AEAD 2022">
+                            <option value="2022-blake3-aes-128-gcm">2022-blake3-aes-128-gcm</option>
+                            <option value="2022-blake3-aes-256-gcm">2022-blake3-aes-256-gcm</option>
+                            <option value="2022-blake3-chacha20-poly1305">2022-blake3-chacha20-poly1305</option>
+                        </optgroup>
+                        <optgroup label="Stream (legacy)">
+                            <option value="aes-128-cfb">aes-128-cfb</option>
+                            <option value="aes-256-cfb">aes-256-cfb</option>
+                            <option value="chacha20-ietf">chacha20-ietf</option>
+                            <option value="rc4-md5">rc4-md5</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="form-tags">Tags (comma separated)</label>
+                    <input type="text" id="form-tags" placeholder="e.g. jp, premium">
+                </div>
+                <div class="form-group form-check">
+                    <label>
+                        <input type="checkbox" id="form-enabled" checked>
+                        Enabled
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" id="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-overlay" class="modal-overlay hidden">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="btn-close" id="btn-settings-close">&times;</button>
+            </div>
+            <form id="settings-form">
+                <div class="form-group">
+                    <label for="settings-interval">Check Interval (seconds)</label>
+                    <input type="number" id="settings-interval" min="5" max="3600" value="60">
+                    <div class="form-hint">Min 5s, how often to check all servers</div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" id="btn-settings-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
